@@ -1,0 +1,44 @@
+name: Build VST3
+
+# Laeuft bei jedem Push auf main, bei Pull Requests und per Knopfdruck
+# (GitHub -> Actions -> "Build VST3" -> "Run workflow").
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: Windows VST3 (x64)
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Quellcode holen
+        uses: actions/checkout@v4
+
+      # JUCE wird beim Konfigurieren automatisch geholt (siehe CMakeLists.txt)
+      - name: Konfigurieren
+        run: cmake -S . -B build -A x64
+
+      - name: Bauen (Release)
+        run: cmake --build build --config Release --parallel
+
+      - name: VST3 pruefen
+        shell: pwsh
+        run: |
+          $dir = "build/HolterdipolterComp_artefacts/Release/VST3"
+          Get-ChildItem -Recurse $dir | Select-Object FullName, Length
+          $dll = Get-ChildItem -Recurse $dir -Filter "*.vst3" -File
+          if (-not $dll) { throw "Keine .vst3-Datei im Build-Ergebnis gefunden" }
+
+      - name: VST3 als Download bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: HolterdipolterComp-VST3-Windows
+          path: build/HolterdipolterComp_artefacts/Release/VST3/
+          if-no-files-found: error

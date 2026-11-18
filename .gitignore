@@ -1,0 +1,7 @@
+build/
+out/
+.vs/
+*.user
+Fertig/
+build-log.txt
+build-status.txt
