@@ -10,6 +10,16 @@
 
 JUCE 9.0.1 wird dabei automatisch geholt; es muss nicht im Repository liegen.
 
+### Release erstellen
+
+Ein Versions-Tag erzeugt automatisch ein GitHub-Release mit der VST3 als ZIP und dem Handbuch:
+
+    git tag v0.2.0
+    git push origin v0.2.0
+
+Alternativ auf GitHub unter Releases -> "Draft a new release" einen neuen Tag `v...` anlegen und veroeffentlichen.
+Normale Pushes auf `main` bauen nur und legen die VST3 als Artifact im jeweiligen Lauf ab.
+
 ## Lokal bauen (Windows, Visual Studio, JUCE 9.0.1)
 
 JUCE wird unter `C:\JUCE-9.0.1` gesucht (anderer Ort: `-DJUCE_DIR=<Pfad>`). Fehlt es dort, wird es automatisch von GitHub geholt.

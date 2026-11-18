@@ -2,14 +2,16 @@ name: Build VST3
 
 # Laeuft bei jedem Push auf main, bei Pull Requests und per Knopfdruck
 # (GitHub -> Actions -> "Build VST3" -> "Run workflow").
+# Ein Tag wie v0.1.0 erzeugt zusaetzlich ein GitHub-Release mit der VST3 als ZIP.
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write   # noetig, um Releases anzulegen
 
 jobs:
   windows:
@@ -42,3 +44,24 @@ jobs:
           name: HolterdipolterComp-VST3-Windows
           path: build/HolterdipolterComp_artefacts/Release/VST3/
           if-no-files-found: error
+
+      - name: VST3 fuer Release packen
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "build/HolterdipolterComp_artefacts/Release/VST3/Holterdipolter Comp.vst3" `
+                           -DestinationPath "HolterdipolterComp-${{ github.ref_name }}-VST3-Windows.zip"
+
+      - name: Release anlegen
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Holterdipolter Comp ${{ github.ref_name }}
+          body: |
+            VST3 fuer Windows (x64).
+
+            Installation: ZIP entpacken und den Ordner `Holterdipolter Comp.vst3`
+            nach `C:\Program Files\Common Files\VST3\` kopieren, dann in Ableton neu scannen.
+          files: |
+            HolterdipolterComp-${{ github.ref_name }}-VST3-Windows.zip
+            docs/Holterdipolter-Comp-Benutzerhandbuch.pdf
